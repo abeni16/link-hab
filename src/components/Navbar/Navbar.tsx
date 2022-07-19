@@ -24,7 +24,7 @@ const Navbar: React.FC = () => {
         />
         <Image
           alt="linkhab logo"
-          src="/images/logo2.png"
+          src="/images/logo2.svg"
           height="40px"
           width="100px"
           display={{ base: "none", md: "unset" }}

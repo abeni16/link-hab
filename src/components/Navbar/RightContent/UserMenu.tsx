@@ -18,9 +18,10 @@ import { VscAccount } from "react-icons/vsc";
 import { CgProfile } from "react-icons/cg";
 import { MdOutlineLogin } from "react-icons/md";
 import { auth } from "../../../firebase/clientApp";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilValue, useResetRecoilState, useSetRecoilState } from "recoil";
 import { authModalState } from "../../../atoms/authModalAtom";
 import { IoSparkles } from "react-icons/io5";
+import { communityState } from "../../../atoms/communitiesAtom";
 
 type UserMenuProps = {
   user?: User | null;
@@ -28,6 +29,12 @@ type UserMenuProps = {
 
 const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
   const setAuthModal = useSetRecoilState(authModalState);
+  const resetCommunityState = useResetRecoilState(communityState);
+  const logout = async () => {
+    await signOut(auth);
+    resetCommunityState();
+  };
+
   return (
     <Menu>
       <MenuButton
@@ -90,11 +97,10 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
       <MenuList>
         {user ? (
           <>
-            {" "}
             <MenuItem
               fontSize="10pt"
               fontWeight="700"
-              _hover={{ bg: "teal.500", color: "white" }}
+              _hover={{ bg: "red.400", color: "white" }}
             >
               <Flex align="center">
                 <Icon as={CgProfile} fontSize={20} mr={2} />
@@ -105,8 +111,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
             <MenuItem
               fontSize="10pt"
               fontWeight="700"
-              _hover={{ bg: "teal.500", color: "white" }}
-              onClick={() => signOut(auth)}
+              _hover={{ bg: "red.400", color: "white" }}
+              onClick={logout}
             >
               <Flex align="center">
                 <Icon as={MdOutlineLogin} fontSize={20} mr={2} />
