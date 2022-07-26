@@ -31,7 +31,6 @@ const AuthModal: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log("user: ", user);
     if (user) handelClose();
   }, [user]);
 

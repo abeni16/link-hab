@@ -6,7 +6,8 @@ import { auth, firestore } from "../../../firebase/clientApp";
 import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { FIREBASE_ERRORS } from "../../../firebase/errors";
 import { User } from "firebase/auth";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { m } from "framer-motion";
 
 type SignUpProps = {};
 
@@ -31,8 +32,8 @@ const SignUp: React.FC<SignUpProps> = () => {
   };
 
   const createUserDocument = async (user: User) => {
-    await addDoc(
-      collection(firestore, "users"),
+    await setDoc(
+      doc(firestore, "users", user.uid),
       JSON.parse(JSON.stringify(user))
     );
   };

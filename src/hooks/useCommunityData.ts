@@ -4,11 +4,13 @@ import {
   doc,
   getDocs,
   increment,
+  Transaction,
   writeBatch,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
+import { authModalState } from "../atoms/authModalAtom";
 import {
   Community,
   CommunitySnippet,
@@ -22,10 +24,17 @@ const useCommunityData = () => {
     useRecoilState(communityState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const setAuthModalState = useSetRecoilState(authModalState);
 
   const onJoinOrLeave = (communityData: Community, isJoined: boolean) => {
+    if (!user) {
+      setAuthModalState({ open: true, view: "login" });
+      return;
+    }
+
     if (isJoined) {
       leaveCommunity(communityData.id);
+      return;
     }
     joinCommunity(communityData);
   };
@@ -38,6 +47,7 @@ const useCommunityData = () => {
         communityId: communityData.id,
         imageUrl: communityData.imageUrl || "",
       };
+
       batch.set(
         doc(
           firestore,
@@ -95,7 +105,7 @@ const useCommunityData = () => {
       const snippetDoc = await getDocs(
         collection(firestore, `users/${user?.uid}/communitySnippets`)
       );
-      const snippets = await snippetDoc.docs.map((doc) => ({ ...doc.data() }));
+      const snippets = snippetDoc.docs.map((doc) => ({ ...doc.data() }));
       setCommunityStateValue((prev) => ({
         ...prev,
         mySnippets: snippets as CommunitySnippet[],

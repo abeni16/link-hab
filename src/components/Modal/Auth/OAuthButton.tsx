@@ -9,10 +9,12 @@ import { FIREBASE_ERRORS } from "../../../firebase/errors";
 const OAuthButton: React.FC = () => {
   const [signInWithGoogle, userCred, loading, error] =
     useSignInWithGoogle(auth);
+
   const createUserDocument = async (user: User) => {
     const userRef = doc(firestore, "users", user.uid);
     await setDoc(userRef, JSON.parse(JSON.stringify(user)));
   };
+
   useEffect(() => {
     if (userCred) {
       createUserDocument(userCred.user);
