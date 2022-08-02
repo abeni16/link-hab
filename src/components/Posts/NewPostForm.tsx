@@ -63,7 +63,7 @@ const NewPostForm: React.FC<NewPostFormProps> = ({
   const { selectedFile, setSelectedFile, onSelectFile } = useSelectFile();
   const handelCreatePost = async () => {
     const { communityId } = router.query;
-    const newPost: Post = {
+    const newPost: any = {
       communityImageUrl: communityImageURL || "",
       communityId: communityId as string,
       creatorId: user.uid,
