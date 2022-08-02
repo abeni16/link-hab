@@ -5,8 +5,11 @@ import RightContent from "./RightContent/RightContent";
 import Searchinput from "./Searchinput";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Directory from "../Navbar/Directory/Directory";
+import useDirectory from "../../hooks/useDirectory";
+import { defaultMenuItem } from "../../atoms/directoryMenuAtom";
 const Navbar: React.FC = () => {
   const [user, loading, error] = useAuthState(auth);
+  const { onSelectMenuItem } = useDirectory();
   return (
     <Flex
       bg="#fff"
@@ -15,7 +18,12 @@ const Navbar: React.FC = () => {
       align="center"
       justify={{ md: "space-between" }}
     >
-      <Flex align="center" width={{ base: "40px", md: "auto" }}>
+      <Flex
+        align="center"
+        width={{ base: "40px", md: "auto" }}
+        onClick={() => onSelectMenuItem(defaultMenuItem)}
+        cursor="pointer"
+      >
         <Image
           alt="linkhab logo"
           src="/images/logo1.png"

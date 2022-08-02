@@ -22,11 +22,13 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { BsFillEyeFill, BsFillPersonFill } from "react-icons/bs";
 import { HiLockClosed } from "react-icons/hi";
 import { auth, firestore } from "../../../firebase/clientApp";
+import useDirectory from "../../../hooks/useDirectory";
 type CreateCommunityModalProps = {
   open: boolean;
   handelClose: () => void;
@@ -42,7 +44,8 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
   const [error, setErorr] = useState("");
   const [loading, setLoading] = useState(false);
   const [user] = useAuthState(auth);
-
+  const router = useRouter();
+  const { toggleMenuOpen } = useDirectory();
   const handelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.value.length > 21) return;
     setCommunityName(event.target.value);
@@ -90,6 +93,9 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
             isModerator: true,
           }
         );
+        handelClose();
+        toggleMenuOpen();
+        router.push(`/r/${communityName}`);
       });
 
       setLoading(false);

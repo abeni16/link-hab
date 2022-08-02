@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Icon, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Icon, Image, Text } from "@chakra-ui/react";
 import React from "react";
 import { FaReddit } from "react-icons/fa";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -20,12 +20,21 @@ const Header: React.FC<HeaderProps> = ({ communityData }) => {
       <Box height="50%" bg="green.400" />
       <Flex justify="center" bg="white" flexGrow={1}>
         <Flex width="95%" maxWidth="860px">
-          {communityData.imageUrl ? (
-            <></>
+          {communityStateValue.currentCommunity?.imageURL ? (
+            <Image
+              borderRadius="full"
+              boxSize="66px"
+              src={communityStateValue.currentCommunity.imageURL}
+              position="relative"
+              top={-3}
+              color="green.500"
+              border="4px solid white"
+              alt=""
+            />
           ) : (
-            // <Image />
+            //
             <Icon
-              as={FaReddit}
+              as="svg"
               fontSize={64}
               position="relative"
               top={-3}

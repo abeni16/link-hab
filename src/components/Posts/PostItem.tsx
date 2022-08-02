@@ -1,9 +1,12 @@
 import {
+  Alert,
+  AlertIcon,
   Flex,
   Icon,
   Image,
   Img,
   Skeleton,
+  Spinner,
   Stack,
   Text,
 } from "@chakra-ui/react";
@@ -17,16 +20,25 @@ import {
   IoArrowRedoOutline,
   IoBookmarkOutline,
   IoTrashOutline,
+  IoPeopleCircleOutline,
 } from "react-icons/io5";
-import { BsChat } from "react-icons/bs";
+import { BsChat, BsDot } from "react-icons/bs";
 import moment from "moment";
+import { useRouter } from "next/router";
+import Link from "next/link";
 type PostItemProps = {
   post: Post;
   userIsCreator: boolean;
+  homePage?: boolean;
   userVoteValue?: number;
-  onVote: () => void;
-  onDeletePost: () => void;
-  onSelectPost: () => void;
+  onVote: (
+    event: React.MouseEvent<SVGElement, MouseEvent>,
+    post: Post,
+    vote: number,
+    comunityId: string
+  ) => void;
+  onDeletePost: (post: Post) => Promise<boolean>;
+  onSelectPost?: (post: Post) => void;
 };
 
 const PostItem: React.FC<PostItemProps> = ({
@@ -36,24 +48,56 @@ const PostItem: React.FC<PostItemProps> = ({
   onVote,
   onDeletePost,
   onSelectPost,
+  homePage,
 }) => {
   const [loadingImage, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const router = useRouter();
+  const [loadingDelete, setLoadingDelete] = useState(false);
+  const handelDelete = async (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    event.stopPropagation();
+    try {
+      setLoadingDelete(true);
+      const success = await onDeletePost(post);
+      if (!success) {
+        throw Error("faild to delete the post");
+      }
+      console.log("deleted succussfully");
+      if (singlePostPage) {
+        router.push(`/r/${post.communityId}`);
+      }
+    } catch (error: any) {
+      setError(error.message);
+    }
+    setLoading(false);
+  };
+  const singlePostPage = !onSelectPost;
   return (
     <Flex
       bg="white"
-      borderRadius={4}
+      borderRadius={singlePostPage ? "4px 4px 0 0" : "4px"}
       border="1px solid white"
-      _hover={{ borderColor: "gray.300" }}
-      onClick={onSelectPost}
+      onClick={() => onSelectPost && onSelectPost(post)}
+      cursor={singlePostPage ? "unset" : "pointer"}
+      _hover={{ borderColor: singlePostPage ? "none" : "gray.500" }}
     >
-      <Flex direction="column" align="center" bg="gray.50" p={2} width="40px">
+      <Flex
+        direction="column"
+        align="center"
+        bg={singlePostPage ? "white" : "gray.100"}
+        p={2}
+        width="40px"
+        borderRadius={singlePostPage ? "0 0" : "3px 0 0 3px"}
+      >
         <Icon
           as={
             userVoteValue === 1 ? IoArrowUpCircleSharp : IoArrowUpCircleOutline
           }
           color={userVoteValue === 1 ? "red.500" : "gray.400"}
           fontSize={22}
-          onClick={onVote}
+          onClick={(event) => onVote(event, post, 1, post.communityId)}
           cursor="pointer"
         />
 
@@ -66,14 +110,50 @@ const PostItem: React.FC<PostItemProps> = ({
           }
           color={userVoteValue === -1 ? "green.500" : "gray.400"}
           fontSize={22}
-          onClick={onVote}
+          onClick={(event) => onVote(event, post, -1, post.communityId)}
           cursor="pointer"
         />
       </Flex>
       <Flex direction="column" width="100%">
+        {error && (
+          <Alert status="error">
+            <AlertIcon />
+            <Text fontSize={12} mr={2}>
+              {error}
+            </Text>
+          </Alert>
+        )}
         <Stack spacing={1} p="10px">
           <Stack direction="row" spacing={0.6} align="center" fontSize="9pt">
             {/* home page */}
+            {homePage && (
+              <>
+                {post.communityImageUrl ? (
+                  <Image
+                    src={post.communityImageUrl}
+                    borderRadius={"full"}
+                    boxSize="18px"
+                    mr={2}
+                    alt=""
+                  />
+                ) : (
+                  <Icon
+                    fontSize={"18pt"}
+                    mr={1}
+                    color="green.500"
+                    as={IoPeopleCircleOutline}
+                  />
+                )}
+                <Link href={`/r/${post.communityId}`}>
+                  <Text
+                    onClick={(event: any) => event.stopPropagation()}
+                    fontWeight={700}
+                    _hover={{ textDecoration: "underline" }}
+                  >{`r/${post.communityId}`}</Text>
+                </Link>
+                <Icon as={BsDot} fontSize={8} color="gray.500" />
+              </>
+            )}
             <Text>
               Posted by u/{post.creatorDisplayName}{" "}
               {moment(new Date(post.createdAt.seconds * 1000)).fromNow()}
@@ -84,15 +164,13 @@ const PostItem: React.FC<PostItemProps> = ({
           </Text>
           <Text fontSize="9pt">{post.body}</Text>
 
-          {post && (
+          {post.imageURL && (
             <Flex justify="center" align="center" p={2}>
               {loadingImage && (
                 <Skeleton height="200px" width="100%" borderRadius={4} />
               )}
               <Image
-                src={
-                  "https://firebasestorage.googleapis.com/v0/b/link-hab.appspot.com/o/posts%2F4PyEaMI6dqKjI34lldtX%2Fimage?alt=media&token=9fa6e2f0-93b8-4e60-8690-b851cb476462"
-                }
+                src={post.imageURL}
                 alt="this is illegal"
                 onLoad={() => setLoading(false)}
                 display={loadingImage ? "none" : "unset"}
@@ -139,10 +217,16 @@ const PostItem: React.FC<PostItemProps> = ({
               _hover={{ bg: "gray.200" }}
               cursor="pointer"
               color="red.500"
-              onClick={onDeletePost}
+              onClick={handelDelete}
             >
-              <Icon as={IoTrashOutline} mr={2} />
-              <Text fontSize="9pt">Delete</Text>
+              {loadingDelete ? (
+                <Spinner size="sm" />
+              ) : (
+                <>
+                  <Icon as={IoTrashOutline} mr={2} />
+                  <Text fontSize="9pt">Delete</Text>
+                </>
+              )}
             </Flex>
           )}
         </Flex>
