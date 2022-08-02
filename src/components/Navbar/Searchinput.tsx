@@ -24,10 +24,9 @@ const Searchinput: React.FC<SearchinputProps> = ({ user }) => {
       bg="gray.50"
     >
       <InputGroup>
-        <InputLeftElement
-          pointerEvents="none"
-          children={<SearchIcon color="gray.300" />}
-        />
+        <InputLeftElement pointerEvents="none">
+          <SearchIcon color="gray.300" />
+        </InputLeftElement>
         <Input
           placeholder="search here"
           height="38px"
@@ -35,12 +34,12 @@ const Searchinput: React.FC<SearchinputProps> = ({ user }) => {
           _hover={{
             bg: "white",
             border: "1px solid",
-            borderColor: "blue.500",
+            borderColor: "green.500",
           }}
           _focus={{
             outlined: "none",
             border: "1px solid",
-            borderColor: "blue.500",
+            borderColor: "green.500",
           }}
           bg="gray.50"
         />
